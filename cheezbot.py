@@ -2,6 +2,7 @@ import sys
 import time
 import telepot
 import re
+import pprint
 
 # Done! Congratulations on your new bot.
 # You will find it at telegram.me/NAMEOFBOT.
@@ -36,9 +37,12 @@ class PersistentCollection:
         self.modifiable = modifiable
         self.size = size
         self.name = name
+        #maximum item string length
+        self.maxlen = 100
         #default strings for replies
         self.stringdict = dict()
         self.stringdict['exception'] = "Unknown switch, switches are s,a,r."
+        self.stringdict['emptytext'] = "You're not carrying anything."
         self.stringdict['noaddtext'] = 'I am overburdened.'
         self.stringdict['addprefix'] = 'Got '
         self.stringdict['addsuffix'] = '.'
@@ -59,7 +63,7 @@ class PersistentCollection:
             self.aliases['add'] = self.additem
 
     def parse(self,text):
-        print self.name + ' parsing ' + "'" + text + "'"
+        print(self.name + ' parsing ' + "'" + text + "'")
         reply = self.stringdict['exception']
         match = re.split('\s+',text.strip(' \t\n\r'))
         cmd = match[0]  #if text is an empty string, match[0] will also be an empty string
@@ -70,6 +74,8 @@ class PersistentCollection:
         return reply
 
     def additem(self,item):
+        if len(item) > self.maxlen:
+            item = item[0:self.maxlen]
         reply = self.stringdict['noaddtext']
         if len(self.list) < self.size:
             self.list.append(item)
@@ -77,7 +83,7 @@ class PersistentCollection:
         return reply
 
     def removeitem(self,text):
-        print 'removing item ' + text
+        print('removing item ' + text)
         if text.isnumeric():
             reply = self.removeitembyindex(int(text)-1) #player sees index from 1 on printout
         else:
@@ -101,13 +107,16 @@ class PersistentCollection:
     def showitems(self,text):
         #text is unused at present
         reply = ''
-        i = 1;
-        for item in self.list:
-            line = str(i) + '. ' + item
-            reply += line
-            if i < len(self.list):
-                reply += '\n'
-            i += 1
+        if len(self.list) > 0:
+            i = 1
+            for item in self.list:
+                line = str(i) + '. ' + item
+                reply += line
+                if i < len(self.list):
+                    reply += '\n'
+                i += 1
+        else:
+            reply = self.stringdict['emptytext']
         return reply
 
     def setdictitem(self,name,value):
@@ -121,14 +130,6 @@ class PersistentCollection:
         self.size = size
 
 
-def rules(text):
-    global rulescollection
-    return rulescollection.parse(text)
-
-def inventory(text):
-    global inventorycollection
-    return inventorycollection.parse(text)
-
 def diplo(text):
     return "Chips! (Some chips may fail if contrary to the eater's values)."
 
@@ -137,10 +138,22 @@ def echo(text):
 
 def initcdict():
     cdict = dict()
-    cdict['/rules'] = rules
-    cdict['/echo'] = echo
-    cdict['/inventory'] = inventory
-    cdict['/diplomacy'] = diplo
+    global rulescollection
+    global inventorycollection
+    global songcollection
+    global appearancecollection
+    global titlecollection
+    global conditioncollection
+    global signcollection
+
+    cdict['/rules'] = rulescollection
+    #cdict['/echo'] = echo
+    cdict['/inventory'] = inventorycollection
+    cdict['/songs'] = songcollection
+    cdict['/appearance'] = appearancecollection
+    cdict['/titles'] = titlecollection
+    cdict['/conditions'] = conditioncollection
+    cdict['/signs'] = signcollection
     return cdict
 
 
@@ -157,18 +170,22 @@ def commandsplitter(text):
 
 def handle(msg):
     global cdict
+    global BOTUSERNAME
     content_type, chat_type, chat_id = telepot.glance2(msg)
     if content_type == 'text':
         chat_id = msg['chat']['id']
         content = msg['text']
+
+        content = content.replace('@'+BOTUSERNAME,'')
+
         split = commandsplitter(content)
         cmd = split['cmd']
         arg = split['arg']
 
-        print 'checking ' + content
+        print('checking ' + content)
 
         if cmd in cdict :
-            bot.sendMessage(chat_id,cdict[cmd](arg))
+            bot.sendMessage(chat_id,cdict[cmd].parse(arg))
 
 # GO 8080
 rulescollection = PersistentCollection('Rules',False, 100)
@@ -181,6 +198,36 @@ inventorycollection = PersistentCollection('Inventory', True, 10)
 inventorycollection.additem('Longsword +1')
 inventorycollection.additem('Cheese of Wounding')
 
+songcollection = PersistentCollection('Songs', True, 5)
+songcollection.setdictitem('addprefix', 'You learned ')
+songcollection.setdictitem('removeprefix', 'You forgot ')
+songcollection.setdictitem('noaddtext','You try to hum the tune but always end up at another.')
+songcollection.setdictitem('emptytext',"You've really never been much of a musician.")
+
+appearancecollection = PersistentCollection('Appearance',True,10)
+appearancecollection.setdictitem('addprefix','You are now wearing ')
+appearancecollection.setdictitem("removeprefix",'You remove your ')
+appearancecollection.setdictitem('emptytext',"You're not wearing anything. Cheeky!")
+
+conditioncollection = PersistentCollection('Conditions',True,5)
+conditioncollection.setdictitem('addprefix','You are afflicted with ')
+conditioncollection.setdictitem('removeprefix','You are no longer afflicted with ')
+conditioncollection.setdictitem('noaddtext','You are already riddled with disease. You doubt another condition will make much difference.')
+conditioncollection.setdictitem('emptytext',"Fit as a fiddle!")
+
+titlecollection = PersistentCollection('Titles',True,3)
+titlecollection.setdictitem('addprefix','You are now known as ')
+titlecollection.setdictitem('removeprefix','You are no longer known as ')
+titlecollection.setdictitem('noaddtext','You are known by too many names already. Any more would be confusing.')
+titlecollection.setdictitem('emptytext',"Your name is known only to yourself... and you aim to keep it that way.")
+
+signcollection = PersistentCollection('Signs',True,5)
+signcollection.setdictitem('addprefix','You learned how to make ')
+signcollection.setdictitem('removeprefix','You forgot how to make ')
+signcollection.setdictitem('removesuffix',"Let's hope you don't need it later.")
+signcollection.setdictitem('noaddtext','Your hands tire and the sign slips through your grasp.')
+signcollection.setdictitem('emptytext',"The only signs you know are obscene, there is no magic in them.")
+
 cdict = initcdict()
 # Getting the token from command-line is better than embedding it in code,
 # because tokens are supposed to be kept secret.
@@ -189,7 +236,9 @@ TOKEN = sys.argv[1]
 
 
 bot = telepot.Bot(TOKEN)
+BOTUSERNAME = bot.getMe()['username']
 bot.notifyOnMessage(handle)
+print('Running scripts for @' + BOTUSERNAME)
 print('Listening ...')
 
 # Keep the program running.
