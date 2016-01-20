@@ -145,7 +145,7 @@ class SaveHack:
     """A hack class to load save routines into cdict"""
     def parse(self,text):
         savecollections()
-        return 'Weary traveller, your progress has been recorded.'
+        return 'Rest easy weary adventurer, your progress has been recorded.'
 
     def getname(self):
         return '/save'
@@ -327,9 +327,9 @@ print('Listening ...')
 i = 0
 while 1:
     time.sleep(100)
-    #very rough 10m updates 6000 * 100 = 60,000
+    #very rough 10m updates 600 * 100 = 60,000
     #don't try and clock anything with this
     i += 1
-    if i == 6000:
+    if i == 600:
         update()
         i = 0
