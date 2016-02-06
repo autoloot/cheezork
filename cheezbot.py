@@ -262,11 +262,18 @@ songcollection.setdictitem('noaddtext','You try to hum the tune but always end u
 songcollection.setdictitem('emptytext',"You've really never been much of a musician.")
 collectionlist.append(songcollection)
 
-appearancecollection = PersistentCollection('/appearance',True,10)
-appearancecollection.setdictitem('addprefix','You are now wearing ')
-appearancecollection.setdictitem("removeprefix",'You remove your ')
-appearancecollection.setdictitem('emptytext',"You're not wearing anything. Cheeky!")
+appearancecollection = PersistentCollection('/appearance',True,5)
+appearancecollection.setdictitem('addprefix','You are known across the land for your ')
+appearancecollection.setdictitem("removeprefix",'With time, all things fade. You lost ')
+appearancecollection.setdictitem('noaddtext',"All these distinguishing features! At this point you feel you're as distinguishable as you're gonna get.")
+appearancecollection.setdictitem('emptytext',"Decidedly average.")
 collectionlist.append(appearancecollection)
+
+clothingcollection = PersistentCollection('/clothing',True,10)
+clothingcollection.setdictitem('addprefix','You are now wearing ')
+clothingcollection.setdictitem("removeprefix",'You remove your ')
+clothingcollection.setdictitem('emptytext',"You're not wearing anything. Cheeky!")
+collectionlist.append(clothingcollection)
 
 conditioncollection = PersistentCollection('/conditions',True,5)
 conditioncollection.setdictitem('addprefix','You are afflicted with ')
