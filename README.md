@@ -8,7 +8,7 @@ Cheezork II uses python telegram bot (https://python-telegram-bot.org/)
 ## Installation
 To install cheezork, you first need to install python telegram bot using any method. We suggest using pip:
 
-`pip install telegram-bot`
+`pip3 install python-telegram-bot`
 
 Then copy this archive to anywhere you've got write access and you're good to go. That's all for the installation.
 
