@@ -176,7 +176,6 @@ class Cheezork:
 
 
 def main():
-    print(os.path.dirname(os.path.realpath(__file__)))
     parser = argparse.ArgumentParser(
         description='Interactive telegram text adventure server.'
         , prog='cheezork'
