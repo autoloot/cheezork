@@ -209,6 +209,7 @@ def main():
     updater.start_polling()
 
 
+# Maintains a PID file at cheezork.pid, so as to allow git hooks to bring it up and down.
 if __name__ == "__main__":
     with PIDFile(os.getcwd() + "/cheezork.pid"):
         main()
