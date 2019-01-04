@@ -2,6 +2,8 @@ from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 from telegram import ParseMode
+from pid.decorator import pidfile
+from pid import PidFileError
 import re
 import json
 import logging
@@ -140,7 +142,7 @@ class Cheezork:
                 if word_found:
                     bot.send_message(chat_id=update.message.chat_id
                                      , text=word_found
-                                     , parse_mode = ParseMode.HTML
+                                     , parse_mode=ParseMode.HTML
                                      )
                 self.save()
 
@@ -174,8 +176,8 @@ class Cheezork:
         dispatcher.add_handler(MessageHandler(Filters.text, self.text_parser))
 
 
-if __name__ == "__main__":
-
+@pidfile('cheezork.pid', './')
+def main():
     parser = argparse.ArgumentParser(
         description='Interactive telegram text adventure server.'
         , prog='cheezork'
@@ -207,3 +209,11 @@ if __name__ == "__main__":
     cheezork.register_dispatcher(dispatcher)
 
     updater.start_polling()
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except PidFileError:
+        print("Cheezork is already running.")
+
