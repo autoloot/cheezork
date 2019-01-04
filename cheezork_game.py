@@ -2,8 +2,6 @@ from telegram.ext import Updater
 from telegram.ext import CommandHandler
 from telegram.ext import MessageHandler, Filters
 from telegram import ParseMode
-from pid.decorator import pidfile
-from pid import PidFileError
 import re
 import json
 import logging
@@ -13,6 +11,7 @@ import datetime
 import argparse
 from cheezork_classes import PersistentCollection
 from cheezork_classes import WordsOfPower
+from pidfile import PIDFile
 
 
 class Cheezork:
@@ -176,8 +175,8 @@ class Cheezork:
         dispatcher.add_handler(MessageHandler(Filters.text, self.text_parser))
 
 
-@pidfile('cheezork.pid', './')
 def main():
+    print(os.path.dirname(os.path.realpath(__file__)))
     parser = argparse.ArgumentParser(
         description='Interactive telegram text adventure server.'
         , prog='cheezork'
@@ -212,8 +211,6 @@ def main():
 
 
 if __name__ == "__main__":
-    try:
+    with PIDFile(os.getcwd() + "/cheezork.pid"):
         main()
-    except PidFileError:
-        print("Cheezork is already running.")
 
